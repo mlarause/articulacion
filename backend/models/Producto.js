@@ -275,20 +275,13 @@ Producto.prototype.reducirStock = async function(cantidad) {
  * util al cancelar uan venta o recibir inventario
  * @param {number} cantidad - cantidad a aumentar
  * @returns {Promise<Producto>} producto actualizado
- * 
  */
-
-
-/**
- * Metodo para obtener la categoria padre
- * 
- * @returns {Promise<Categoria>} - categoria padre
- */
-Subcategoria.prototype.obtenerCategoria = async function(){
-    const Categoria = require('./Categoria');
-    return await Categoria.findByPk(this.categoriaId);
+Producto.prototype.aumentarStock = async function(cantidad) {
+    this.stock += cantidad;
+    return await this.save();
 };
 
-// Exportar modelo Subcategoria
-module.exports = Subcategoria;
+
+// Exportar modelo Producto
+module.exports = Producto;
 
