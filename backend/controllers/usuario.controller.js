@@ -1,179 +1,184 @@
 /**
- * Controlador de categorias 
- * maneja las operaciones crud y activar y desactivar categorias
- * Solo accesible por administradores
+ * Controlador de usuarios ADMIN
+ * maneja las gestion de usuarios por administradoes
+ * Lista de usuarios activa / desactivar cuentas 
  */
 
 /**
  * Importar modelos
  */
 
-const Categoria = require('../models/Categoria');
-const Subcategoria = require('../models/Subcategoria');
-const Producto = require('../models/Producto');
+const Usuario = require('../models/Usuario');
+
 
 
 /**
- * obtener todas las categorias
+ * obtener todas los usuarios
+ * GET /api/usuarios
  * query params:
  * Activo true/false (filtar por estado)
- * incluirsubcategorias true/false(incluir subcategorias realacionadas)
  * 
  * @param {Object} req request Express
  * @param {Object } res response  Express
  */
 
-const getCategorias = async (req, res) => {
+const getUsuarios = async (req, res) => {
     try {
-        const { activo, IncluirSubcategorias } = req.query;
+        const { rol, activo, buscar, pagina = 1, limite = 10 } = req.query;
 
-        // Opciones de consulta 
-        const opciones = {
-            order: [['nombre', 'ASC']] // ordenar de manera alfabetica
-        };
+        //Contruir los filtros
+        const where = {};
+        if (rol) where.rol = rol;
+        if (activo !== undefined) where.activo = activo === 'true';
 
-        // Filtrar por estado activo si es epecifica 
-        if (activo !== undefined) {
-            opciones.where = { activo: activo === 'true' };
+        //Busqueda por texto
+        if (buscar) {
+            const { Op } = require('sequelize');
+            where[Op.or] = [
+                { nombre: { [Op.like]: `%${buscar}%` }  },
+                { apellido: { [Op.like]: `%${buscar}%` }  },
+                { email: { [Op.like]: `%${buscar}%` }  },
+            ];
         }
 
-        // Incluir subcategorias si se solicita 
-        if (IncluirSubcategorias === 'true') {
-            opciones.include == [{
-                model: Subcategoria,
-                as: 'subcategorias', // campo del alias para la relacion
-                attributes: ['id', 'nombre', 'descripcion', 'activo'] //campos a inclur de la subcategoria
-            }]
-        }
+        //Paginacion
+        const offset = (parseInt(pagina) -1) * parseInt(limite);
 
-        // Obtener categorias
-        const categorias = await Categoria.findAll(opciones);
+        //Obtener usuarios sin password 
+        const { count, rows: usuarios } = await Usuario.findAndCountAll({
+            where,
+            attributes: {  exclude: ['password'] },
+            limit: parseInt(limite),
+            offset,
+            order: [['createdAt', 'DESC']]
+        });
 
-        // Respuesta Exitosa
+        //respuesta exitosa
         res.json({
             success: true,
-            count: categorias.length,
             data: {
-                categorias
+                usuarios,
+                paginacion: {
+                    total: count,
+                    pagina: parseInt(pagina),
+                    limite: parseInt(limite),
+                    totalPaginas: Math.ceil(count / parseInt(limite))
+                }
             }
-        });      
+        });
+        } catch (error) {
+            console.error('Error en getUsuarios:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener usuarios',
+                error: error.message
+            });
+        }
+    };
 
-    } catch (error) {
-        console.error('Error en getCaregorias: ', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener categorias',
-            error: error.message
-        })
-    }
-};
-
+    
 /**
- * obtener  las categorias por id
- * GET /api/categorias/:id
+ * obtener  un usuario por id
+ * GET /api/admin/usuarios/:id
  * 
  * @param {Object} req request Express
  * @param {Object } res response  Express
  */
 
-const getCategoriasById = async (req, res) => {
+const getUsuarioById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Buscar categorias con subcategorias y contar productos 
-        const categoria = await Categoria.findByPk( id,{
-            include: [
-                {
-                    model: Subcategoria,
-                    as: 'subcategorias',
-                    attributes: ['id', 'nombre', 'descripcion', 'activo']
-                },
-                {
-                    model: Producto,
-                    as: 'productos',
-                    attributes: ['id']
-                }
-            ] 
-        });
+        // Buscar usuarios 
+        const usuario = await Usuario.findByPk( id, {
+            attributes: { exclude: ['password'] },
+        });            
 
-        if (!categoria) { 
+        if (!usuario) { 
             return res.status(404).json({
                 success: false,
-                message: 'Categoria no encontrada'
+                message: 'Usuario no encontrado'
             });
         }
-
-        // agregar contador de productos
-        const categoriaJSON = categoria.toJSON();
-        categoriaJSON.totalProductos = categoriaJSON.productos.length;
-        delete categoriaJSON.productos;//no enviar la lista completa solo el contador
 
         // Respuesta exitosa
         res.json({
             success: true,
             data: {
-                categoria: categoriaJSON
+                usuario
             }
         });
     
 
     } catch (error) {
-        console.error('Error en getCategoriaById: ', error);
+        console.error('Error en getUsuarioById: ', error);
         res.status(500).json({
             success: false,
-            message: 'Error al obtener categoria',
+            message: 'Error al obtener usuario',
             error: error.message
         })
     }
 };
 
 /**
- * Crear una categoria 
- * POST /api/admin/categorias
- * Body: { nombre, descripcion }
+ * Crear nuevo usuario
+ * POST /api/admin/usuarios
+ * Body: { nombre, apellido, email, password, rol, telefono, direccion}
  * @param {Object} req request Express
  * @param {Object} res response Express
  */
 
-const crearCategoria = async (req, res) => {
+const crearUsuario = async (req, res) => {
     try {
-        const {nombre, descripcion} = req.body;
+        const {nombre, apellido, email, password, rol, telefono, direccion} = req.body;
 
-        //validacion 1 verificar campos requeridos
-        if (!nombre) {
+        //validaciones
+        if (!nombre || !apellido || !email || !password || !rol) {
             return res.status(400).json({
                 success: false,
-                message: 'El nombre de la categoria es requerido'
+                message: 'Faltan  campos requeridos: nombre, apellido, email, password, rol'
             });
         }
 
-        //Validacion 2 verificar que el nombre no exista
-        const categoriaExistente = await Categoria.findOne({ where: { nombre}
-        });
-
-        if (categoriaExistente) {
+        //validar rol
+        if (!['cliente', 'auxiliar', 'administrador'].includes(rol)) {
             return res.status(400).json({
                 success: false,
-                message: `Ya existe una categoria con el nombre "${nombre}"`
+                message: 'Rol invalido. Debe ser: cliente, auxiliar o administrador'
+            });
+        }
+        
+        //Validar email unico
+        const usuarioExistente = await Usuario.findOne({ where: { email }});
+        if (usuarioExistente) {
+            return res.status(400).json({
+                success: false,
+                message: 'El email ya esta registrado'
             });
         }
 
-        //Crear Categoria
-        const nuevaCategoria = await Categoria.create({
+        //Crear usuario
+        const nuevaUsuario = await Usuario.create({
             nombre,
-            descripcion: descripcion || null, // si no se proporciona la descripcion se establece como null
+            apellido,
+            email,
+            password,
+            rol,
+            telefono: telefono || null,
+            direccion: direccion || null, // si no se proporciona  se establece como null
             activo: true
         });
 
         // Respuesta exitosa 
         res.status(201).json({
             success: true,
-            message: 'Categoria creada exitosamente',
+            message: 'Usuario creado exitosamente',
             data: {
-                categoria: nuevaCategoria
+                usuario: nuevaUsuario.toJson() // convertir a JSON para excluir campos sensibles
             }
         });
     } catch (error) {
+        console.error('Error al crearUsuario', error);
         if (error.name === 'SequelizeValidationError') {
         return res.status(400).json({
             success: false,
@@ -184,83 +189,71 @@ const crearCategoria = async (req, res) => {
 
     res.status(500).json({
         success: false,
-        message: 'Error al crear categoria',
+        message: 'Error al crear usuario',
         error: error.message
     })
 }
 };
 
 /**
- * Actualizar Categoria 
- * PUT /api/admin/categorias/:id
- * body: { nombre, descripcion }
+ * Actualizar Usuario
+ * PUT /api/admin/usuarios/:id
+ * body: { nombre, apellido, email, password, rol, telefono, direccion }
  * @param {Object} req rquest Express
  * @param {Object} res response Express
  */
 
-const actualizarCategoria = async (req, res) => {
+const actualizarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, descripcion } = req.body;
+        const { nombre, apellido, telefono, direccion, rol } = req.body;
 
-        // Buscar categoria
-        const categoria = await Categoria.findByPk(id);
+        // Buscar usuario
+        const usuario = await Usuario.findByPk(id);
 
-        if (!categoria) {
+        if (!usuario) {
             return res.status(404).json({
                 success: false,
-                message: 'Categoria no encontrada'
+                message: 'Usuario no encontrado'
             });
         }
 
-        // validacion 1 si se cambia el nombre verificar que no exista
-        if (nombre && nombre !== categoria.nombre) {
-            const categoriaConMismoNombre = await Categoria.findOne({ where: { nombre}
-            });
-
-            if (categoriaConMismoNombre) {
+        // validar rol si se proporciona
+        if (rol && ['cliente', 'administrador'].includes(rol)) { 
                 return res.status(400).json({
                     success: false,
-                    message: `Ya existe una categoria con el nombre "${nombre}"`
+                    message: 'rol invalido'
                 });
             }
-        }
 
         // Acatualizar campos 
-        if (nombre !== undefined) categoria.nombre = nombre;
-        if (descripcion !== undefined) categoria.descripcion= descripcion;
-        if (activo !== undefined) categoria.activo = activo;
+        if (nombre !== undefined) usuario.nombre = nombre;
+        if (apellido !== undefined) usuario.apellido = apellido;
+        if (telefono !== undefined) usuario.telefono = telefono;
+        if (direccion !== undefined) usuario.direccion = direccion;
+        if (rol !== undefined) usuario.rol = rol;
 
         // guardar cambios
-        await categoria.save();
+        await usuario.save();
 
         // Respuesta exitosa
         res.json({
             success: true,
-            message: 'Categoria actualizada exitosamente',
+            message: 'usuario actualizada exitosamente',
             data: {
-                categoria
+                usuario: usuario.toJson()
             }
         });
 
         } catch (error) {
-            console.error('Error en actualizarCategoria:', error);
-
-            if (error.name === 'SequelizeValidationError') {
-                return res.status(400).json({
+            console.error('Error en actualizarUsuario:', error);
+                return res.status(500).json({
                     success: false,
-                    message: 'Error de validacion',
-                    errors: error.errors.map(e => e.message)
+                    message: 'Error al actualizar usuario',
+                    error: error.message
                 });
             }
-
-            res.status(500).json({
-                success: false,
-                message: 'Error al actualizar categoria',
-                error: error.message
-            });
-        }
-    };
+        };
 
     /**
      * Activar/Desactivar categoria
