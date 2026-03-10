@@ -45,12 +45,33 @@ router.patch('/categorias/:id/toggle', categoriaController.toggleCategoria);
 router.get('/categorias/:id', soloAdministrador,  categoriaController.eliminarCategoria);
 
 
+//Rutas de subcategorias
+// get /api/admin/subcategorias
+router.get('/subcategorias', subcategoriaController.getSubcategorias);      
+
+// get /api/admin/subcategorias/:id
+router.get('/subcategorias/:id', subcategoriaController.getSubcategoriasById);
+
+
+// POST /api/admin/subcategorias
+router.post('/subcategorias', subcategoriaController.crearSubcategoria);
+
+// PUT /api/admin/subcategorias
+router.put('/subcategorias/:id', subcategoriaController.actualizarSubcategoria);
+
+// patch /api/admin/subcategorias/:id/toggle desactivar o activar subcategoria 
+router.patch('/subcategorias/:id/toggle', subcategoriaController.toggleSubcategoria);
+
+// delete /api/admin/subcategorias/:id
+router.delete('/subcategorias/:id', soloAdministrador, subcategoriaController.eliminarSubcategoria);
+
+
 //Rutas de productos
 // get /api/admin/productos
 router.get('/productos', productoController.getProductos); 
 
 // get /api/admin/productos:id
-router.get('/productos/:id', productoController.getProductosById);
+router.get('/productos/:id', productoController.getProductoById);
 
 
 // POST /api/admin/productos
@@ -67,5 +88,49 @@ router.patch('/productos/:id/stock', productoController.actualizarStock);
 
 // delete /api/admin/productos/:id
 router.delete('/productos/:id', soloAdministrador, productoController.eliminarProducto);
+
+
+//Rutas de usuarios
+// get /api/admin/usuarios/stats
+
+router.get('/usuarios/stats', usuarioController.getEstadisticasUsuarios);
+
+
+router.get('/usuarios', usuarioController.getUsuarios); 
+
+// get /api/admin/usuarios:id
+router.get('/usuarios/:id', usuarioController.getUsuarioById);
+
+
+// POST /api/admin/usuarios
+router.post('/usuarios',soloAdministrador, usuarioController.crearUsuario);
+
+// PUT /api/admin/usuarios
+router.put('/usuarios/:id', soloAdministrador, usuarioController.actualizarUsuario);
+
+// patch /api/admin/usuarios:id/toggle desactivar o activar usuario 
+router.patch('/usuarios/:id/toggle', soloAdministrador, usuarioController.toggleUsuario);
+
+// delete /api/admin/usuarios/:id
+router.delete('/usuarios/:id', soloAdministrador, usuarioController.eliminarUsuario);
+
+
+//Rutas de pedidos
+// get /api/admin/pedidos/estadisticas
+
+router.get('/pedidos/estadisticas', pedidoController.getEstadisticasPedidos);
+
+
+router.get('/pedidos', pedidoController.getAllPedidos); 
+
+// get /api/admin/pedidos/:id
+router.get('/pedidos/:id', pedidoController.getPedidoById);
+
+// PUT /api/admin/pedidos/:id/estado
+router.put('/pedidos/:id/estado',pedidoController.actualizarEstadoPedido);
+
+module.exports = router;
+
+
 
 
