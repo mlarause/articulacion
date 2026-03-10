@@ -250,7 +250,7 @@ const getCategorias = async (req, res) => {
  * @param {Object } res response  Express
  */
 
-const getSubcategoriasPorCategorias = async (req, res) => {
+const getSubcategoriasPorCategoria = async (req, res) => {
     try {
         const { id } = req.params;
         const { Op } = require('sequelize');
@@ -378,7 +378,7 @@ const getProductosDestacados = async (req, res) => {
         getProductos,
         getProductoById,
         getCategorias,
-        getSubcategoriasPorCategorias,
+        getSubcategoriasPorCategoria,
         getProductosDestacados
     }
 
