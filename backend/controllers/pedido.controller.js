@@ -55,8 +55,8 @@ const crearPedido = async (req, res) => {
 
         // obtener items del carrito 
 
-        const carritoItems = await Carrito.findAll({
-            where: { usuarioId: req.user.usuarioId },
+        const itemsCarrito = await Carrito.findAll({
+            where: { usuarioId: req.usuario.usuarioId },
             include: [{
                 model: Producto,
                 as: 'producto',
@@ -110,7 +110,7 @@ const crearPedido = async (req, res) => {
 
         //crear pedido 
         const pedido = await Pedido.create({
-            usuarioId: req.user.usuarioId,
+            usuarioId: req.usuario.id,
             total: totalPedido,
             estado: 'pendiente',
             direccionEnvio,

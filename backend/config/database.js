@@ -1,13 +1,13 @@
 /**CONFIGURACION DE LA BASE DE DATOS */
 
 //Importar Sequelize
-const { Sequelize } = require('sequlize');
+const { sequelize } = require('sequelize');
 
 //Importar dotenv para varibles de entorno
 require('dotenv').config();
 
 //Crear instancias de secualize
-const sequelize = new Sequelize(
+const Sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
     process.env.DB_PASSWORD,
@@ -34,7 +34,7 @@ const sequelize = new Sequelize(
         // Opciones adicionales 
         define: {
             // timestamps: true crea automaticamente los campos createdAt y updatedAt
-            timestramps: true,
+            timestamps: true,
 
             // underscored: true usa snake_case para nombres de las columnas 
             underscored: false,

@@ -8,7 +8,7 @@
  */
 
 const Usuario = require('../models/Usuario');
-const { generarToken } = require('../config/jwt');
+const { generateToken } = require('../config/jwt');
 
 
 
@@ -241,7 +241,7 @@ const updateMe= async (req, res) => {
         const { nombre, apellido, telefono, direccion } = req.body;
 
         // Buscar usuario
-        const usuario = await Usuario.findByPk(req.usuari);
+        const usuario = await Usuario.findByPk(req.usuario.id);
 
         if (!usuario) {
             return res.status(404).json({

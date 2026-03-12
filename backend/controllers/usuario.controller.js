@@ -158,7 +158,7 @@ const crearUsuario = async (req, res) => {
         }
 
         //Crear usuario
-        const nuevaUsuario = await Usuario.create({
+        const nuevoUsuario = await Usuario.create({
             nombre,
             apellido,
             email,
@@ -174,7 +174,7 @@ const crearUsuario = async (req, res) => {
             success: true,
             message: 'Usuario creado exitosamente',
             data: {
-                usuario: nuevaUsuario.toJson() // convertir a JSON para excluir campos sensibles
+                usuario: nuevoUsuario.toJson() // convertir a JSON para excluir campos sensibles
             }
         });
     } catch (error) {

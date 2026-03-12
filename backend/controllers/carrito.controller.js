@@ -44,7 +44,7 @@ const getCarrito = async (req, res) => {
         });
 
         //Calcular el total del carrito
-        let totalCarrito = 0;
+        let total = 0;
         itemsCarrito.forEach (item => {
             total += parseFloat(item.precioUnitario) * item.cantidad;
         });
@@ -57,7 +57,7 @@ const getCarrito = async (req, res) => {
                 resumen: {
                     totalItems: itemsCarrito.length,
                     cantidadTotal: itemsCarrito.reduce((sum, item) => sum + item.cantidad, 0),
-                    totalCarrito: total.toFixed(2)
+                    total: total.toFixed(2)
                 }
             }
         });
@@ -89,8 +89,8 @@ const agregarAlCarrito = async (req, res) => {
         }
 
         // validacion 2 cantidad valida
-        const cantidadNUm = parseInt(cantidad);
-        if (cantidadNUm < 1) {
+        const cantidadNum = parseInt(cantidad);
+        if (cantidadNum < 1) {
             return res.status(400).json({
                 success: false,
                 message: 'La cantidad debe ser al menos 1'
@@ -117,14 +117,14 @@ const agregarAlCarrito = async (req, res) => {
         //Validaciin 4 verificar si ya existe en el carrito
         const itemExistente = await Carrito.findOne({
             where: {
-                usuarioId: req.ususario.id,
+                usuarioId: req.usuario.id,
                 productoId
             }
         });
 
         if (itemExistente) {
             //Actualizar cantidad
-            const nuevaCantidad = itemExistente.cantidad + cantidadNUm;
+            const nuevaCantidad = itemExistente.cantidad + cantidadNum;
 
             //validar stock displonible 
             if (nuevaCantidad > producto.stock) {
@@ -156,7 +156,7 @@ const agregarAlCarrito = async (req, res) => {
         }
 
         //Validacion 5 stock disponible
-        if (cantidadNUm > producto.stock) {
+        if (cantidadNum > producto.stock) {
             return res.status(400).json({
                 success: false,
                 message: `Sockt  insuficiente . Disponible: ${producto.stock}`
@@ -167,7 +167,7 @@ const agregarAlCarrito = async (req, res) => {
         const nuevoItem = await Carrito.create({
             usuarioId: req.usuario.id,
             productoId,
-            cantidad: cantidadNUm,
+            cantidad: cantidadNum,
             precioUnitario: producto.precio
         });
 

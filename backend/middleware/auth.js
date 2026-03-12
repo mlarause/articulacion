@@ -39,7 +39,7 @@ const verificarAuth = async (req, res, next) => {
         //paso 2 verificar que el token es valido
         let decoded;// funcion para decodificar el token 
         try {
-            decoded = verificarToken(token);
+            decoded = verifyToken(token);
         } catch (error) {
             return res.status(401).json({
                 success: false,

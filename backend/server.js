@@ -26,7 +26,7 @@ const { initAssociations } = require('./models');
 
 // importar seeders 
 const { runSeeders } = require('./seeders/adminSeeder');
-const { timeStamp } = require('console');
+
 
 //Crear aplicaciones express
 
@@ -43,7 +43,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000', // url del frontend
     credentials: true,//permite envio de cookies
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // métodos permitidos
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization']// Headers permitidos
 })); 
 

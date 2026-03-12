@@ -44,6 +44,16 @@ const getProductos = async (req, res) => {
         if (activo !== undefined) where.activo = activo === 'true';
         if (conStock === 'true') where.stock = { [require('sequelize').Op.gt]: 0 };
 
+        if (buscar) {
+            const { Op } = require('sequelize');
+            // Op.or busca por nombre o descripcion
+            //Op.like equivale a un like en sql con comodines para buscar considencias parciales
+            where[Op.or] = [
+                { nombre: { [Op.like]: `%${buscar}%` }},
+                { descripcion: { [Op.like]: `%${buscar}%` }}
+            ];
+        }
+
         //paginacion
         const offset = (parseInt(pagina) -1) * parseInt(limite);
 
@@ -535,8 +545,8 @@ const actualizarProducto = async (req, res) => {
                 });
             }
 
-            const cantidadNUm = parseInt(cantidad);
-            if (cantidadNUm < 0) {
+            const cantidadNum = parseInt(cantidad);
+            if (cantidadNum < 0) {
                 return res.status(400).json({
                     success: false,
                     message: 'La cantidad no puede ser negativa'
@@ -555,19 +565,19 @@ const actualizarProducto = async (req, res) => {
 
             switch (operacion) {
                 case 'aumentar':
-                    nuevoStock = producto.aumentarStock(cantidadNUm);
+                    nuevoStock = producto.aumentarStock(cantidadNum);
                     break;
                 case 'reducir':
-                    if (cantidadNUmb > producto.stock) {
+                    if (cantidadNum > producto.stock) {
                         return res.status(400).json({
                             success: false,
-                            message: `No hay suficiente stock. stock actual: ${producto.stock}`
+                            message: `No hay suficiente stock. Stock actual: ${producto.stock}`
                         });
                     }
-                    nuevoStock = producto.reducirStock(cantidadNUm);
+                    nuevoStock = producto.reducirStock(cantidadNum);
                     break;
                 case 'establecer':
-                    nuevoStock = cantidadNUm;
+                    nuevoStock = cantidadNum;
                     break;
                 default:
                     return res.status(400).json({
@@ -585,7 +595,7 @@ const actualizarProducto = async (req, res) => {
                     data: {
                         productoId: producto.id,
                         nombre: producto.nombre,
-                        stockAnterior: operacion === 'establecer' ? null : (operacion === 'aumentar' ? producto.stock - cantidadNUm : producto.stock + cantidadNUm),
+                        stockAnterior: operacion === 'establecer' ? null : (operacion === 'aumentar' ? producto.stock - cantidadNum : producto.stock + cantidadNum),
                         stockNuevo: producto.stock
 
                     }
