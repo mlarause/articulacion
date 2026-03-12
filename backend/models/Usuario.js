@@ -7,8 +7,8 @@
 //Importar DataTypes de sequelize
 const { DataTypes } = require('sequelize');
 
-//Importar bcrypt para encriptar contraseñas
-const bcrypt = require('bcrypt');
+//Importar bcryptjs para encriptar contraseñas
+const bcrypt = require('bcryptjs');
 
 //importar instancia de sequelize
 const { sequelize } = require('../config/database');

@@ -1,13 +1,13 @@
 /**CONFIGURACION DE LA BASE DE DATOS */
 
 //Importar Sequelize
-const { sequelize } = require('sequelize');
+const { Sequelize } = require('sequelize');
 
 //Importar dotenv para varibles de entorno
 require('dotenv').config();
 
 //Crear instancias de secualize
-const Sequelize = new Sequelize(
+const sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
     process.env.DB_PASSWORD,

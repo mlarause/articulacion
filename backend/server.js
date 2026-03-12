@@ -19,13 +19,19 @@ const path = require('path');
 require('dotenv').config();
 
 //importar configuarcion de la base de datos
-const dbConfig = require('./config/database');
+const { testConnection, syncDatabase } = require('./config/database');
 
 // importar modelos y asociaciones
 const { initAssociations } = require('./models');
 
 // importar seeders 
-const { runSeeders } = require('./seeders/adminSeeder');
+let runSeeders = async () => {};
+
+try {
+    ({ runSeeders } = require('./seeders/adminSeeder'));
+} catch (error) {
+    console.warn('Seeder de administrador no encontrado, se omite la carga inicial.');
+}
 
 
 //Crear aplicaciones express
@@ -79,7 +85,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // rutas raiz verificar que el servidor esta corriendo
 
-app.get('/,', (req, res) => {
+app.get('/', (req, res) => {
     res.json({
         success: true,
         message: 'Servidor E-commerce Backend corriendo correctamente',
@@ -103,7 +109,7 @@ app.get('/api/health', (req, res) => {
 // rutas de autenticacion
 // incluye registro login, perfil
 
-const authRoutes = require('./routes/authRoutes');
+const authRoutes = require('./routes/auth.routes');
 app.use('/api/auth', authRoutes);
 
 //Rutas del administrador

@@ -6,9 +6,7 @@
  */
 
 // importar fuciones de JWT
-const jwt = { verifyToken, extractToken } = require('../config/jwt');
-
-const { extractToken } = require('../config/jwt');
+const { verifyToken, extractToken } = require('../config/jwt');
 // importar modelo de usuario
 const Usuario = require('../models/Usuario');
 
@@ -17,7 +15,7 @@ const Usuario = require('../models/Usuario');
 const verificarAuth = async (req, res, next) => {
     try {
         //paso 1 obtener el token del header Authorization
-        const authHeader = req.header = req.headers.authorization;
+        const authHeader = req.headers.authorization;
 
         if (!authHeader) {
             return res.status(401).json({ 
@@ -48,7 +46,7 @@ const verificarAuth = async (req, res, next) => {
         }
 
         // buscar el usuario en la bade de datos
-        const usuario = await Usuario.findById(decoded.id, {
+        const usuario = await Usuario.findByPk(decoded.id, {
             attributes: { exclude: ['password'] }// no incluir la contrseña en la respuesta 
         });
 
@@ -69,6 +67,7 @@ const verificarAuth = async (req, res, next) => {
 
         // paso 5 Agregar el usuario al objeto req para uso posterior 
         //ahora en los controladores podemos acceder a req.usuario
+        req.usuario = usuario;
 
         // continuar con el siguiente 
         next();
@@ -108,7 +107,7 @@ const verificarAuthOpcional = async (req, res, next) => {
 
         try {
             const decoded = verifyToken(token);
-            const usuario = await Usuario.findById(decoded.id, {
+            const usuario = await Usuario.findByPk(decoded.id, {
                 attributes: { exclude: ['password'] }
             });
 

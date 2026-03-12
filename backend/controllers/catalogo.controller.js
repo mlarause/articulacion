@@ -9,7 +9,6 @@
 const Producto = require('../models/Producto');
 const Categoria = require('../models/Categoria');
 const Subcategoria = require('../models/Subcategoria');
-const { act } = require('react');
 
 /**
  * obtener todas los productos al publico

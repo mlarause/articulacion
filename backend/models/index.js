@@ -188,7 +188,7 @@ DetallePedido.belongsTo(Producto, {
  * pedido y producto tiene una relacion muchos a muchos atravez de detalle de pedido
  */
 
-Pedido.hasMany(Producto, {
+Pedido.belongsToMany(Producto, {
     through: DetallePedido, // tabla intermedia
     foreignKey: 'pedidoId', // Campo q conecta las tablas
     otherKey: 'productoId', // Campo q conecta las tablas
@@ -196,7 +196,7 @@ Pedido.hasMany(Producto, {
     
 });
 
-Producto.hasMany(Pedido, {
+Producto.belongsToMany(Pedido, {
     through: DetallePedido, // tabla intermedia
     foreignKey: 'productoId', // Campo q conecta las tablas
     otherKey: 'pedidoId', // Campo q conecta las tablas

@@ -32,7 +32,9 @@ const createDatabase = async () => {
         const dbName = process.env.DB_NAME || 'ecommerce_db';
         console.log(`Creando base de datos: ${dbName}...`);
 
-        await connection.query(`CREATE DATABASE IF NOT EXISTS \`'${dbName}' creada/verrificada exitosamente\n`);
+        await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+
+        console.log(`Base de datos '${dbName}' creada/verificada exitosamente\n`);
 
         //Cerrar conexion
         await connection.end();

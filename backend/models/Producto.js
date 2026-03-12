@@ -218,9 +218,9 @@ const Producto = sequelize.define('Producto', {
 
         beforeDestroy: async (producto) => {
             if (producto.imagen) {
-                const { deleteFile} = require('../config/multer');
+                const { deletefile } = require('../config/multer');
                 // intenta eliminar la imagen del servidor
-                const eliminado = await deleteFile(producto.imagen);
+                const eliminado = await deletefile(producto.imagen);
 
                 if (eliminado) {
                     console.log(`Imagen eliminada: ${producto.imagen}`);
